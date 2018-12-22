@@ -1,7 +1,6 @@
-const {Restaurant}=require("../models/Restaurant");
-const {Item}=require("../models/Item");
+const MongoClient=require("mongodb").MongoClient;
 
-const restaurants=[{
+var restaurants=[{
   name:"indian summer cafe",
   address:"Subhas Chauraha,Golambar,Patna",
   rating:3.8,
@@ -36,7 +35,7 @@ const restaurants=[{
   }]
 }]
 
-const items=[{
+var items=[{
   name:"Chicken Butter Masala",
   type:"Non-veg",
   description:"The spices may include garam masala, ginger, garlic, pepper, coriander, cumin, turmeric and chili. The chicken is usually cooked in a tandoor (traditional clay oven), but may be grilled, roasted, or pan fried. It is served in a mild curry sauce that includes butter."
@@ -62,10 +61,20 @@ const items=[{
   description:"Shahi Paneer Korma is an exquisite main dish recipe, which has a thick gravy made of almonds, low fat cream and yoghurt along with a melange of whole and ground spices. "
 }]
 
-Restaurant.remove({}).then(() => {
-  return Restaurant.insertMany(restaurants);
-}).then((docs) => console.log("Successfully inserted"));
+const url="mongodb://localhost:27017/Khanabot";
+MongoClient.connect(url,{ useNewUrlParser: true},(e,db) => {
+  if(e){
+    throw e;
+  }
+  const Restaurant=db.collection("Restaurant");
+  const Item=db.collection("Item");
 
-Item.remove({}).then(() => {
-  return Item.insertMany(items);
-}).then((docs) => console.log("Successfully inserted"));
+  Restaurant.remove({}).then(() => {
+    return Restaurant.insertMany(restaurants);
+  }).then((docs) => console.log("Successfully inserted"));
+
+  Item.remove({}).then(() => {
+    return Item.insertMany(items);
+  }).then((docs) => console.log("Successfully inserted"));
+
+});

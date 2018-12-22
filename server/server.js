@@ -1,23 +1,23 @@
-require('./utils/seed');
-const {mongoose}=require("./db/mongoose");
-const {Restaurant}=require("./models/Restaurant");
-const {Item}=require("./models/Item");
+
+require("./utils/seed");
 
 const express=require("express");
 const path=require('path');
 const bodyParser=require('body-parser');
+const expressMongoDb=require("express-mongo-db");
 
 const app=express();
 const port=3000;
 const publicPath=path.join(__dirname,'../public');
-app.use(bodyParser.json());
 
+app.use(bodyParser.json());
 app.use(express.static(publicPath));
+app.use(expressMongoDb("mongodb://localhost/Khanabot"));
 
 app.get('/allRestaurants',(req,res) => {
-  console.log("hey");
+  const Restaurant=req.db.collection('Restaurant');
 
-  Restaurant.find({}).then((doc) => {
+  Restaurant.find().toArray().then((doc) => {
     const resNames=doc.map((restaurant) => {
       return {"name":restaurant.name,"rating":restaurant.rating};
     });
@@ -27,6 +27,7 @@ app.get('/allRestaurants',(req,res) => {
 });
 
 app.post('/searchRestaurant',(req,res) => {
+  const Restaurant=req.db.collection("Restaurant");
   let restaurant;
 
   Restaurant.findOne({name:req.body.name.toLowerCase()}).then((doc) => {
