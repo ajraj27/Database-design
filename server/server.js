@@ -39,6 +39,17 @@ app.post('/searchRestaurant',(req,res) => {
   })
 });
 
+app.post('/allReviews',async (req,res) => {
+  const Reviews=req.db.collection("Reviews");
+
+  if(req.body.review){
+     const insertedDoc=await Reviews.insert({resName:req.body.resName,review:req.body.review});
+  }
+  const allReviewsBody=await Reviews.find({resName:req.body.resName}).toArray();
+  const allReviews=allReviewsBody.map((review) => review.review);
+  res.send(allReviews);
+});
+
 app.listen(port,() => {
   console.log(`Started app on port ${port}!!`);
 })
