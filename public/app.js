@@ -86,11 +86,40 @@ const fetchReviews=(review,resName) => {
         body:JSON.stringify({resName,review}),
         headers:{"Content-Type":"application/json; charset=utf-8"}
       }).then((doc) => doc.json()).then((doc) => {
-          const allReviews=doc.map((review) => `<li>${review}</li>`).join('');
+          const allReviews=doc.map((item,index) => `<li idx=${index}> ${item.review} ${item.upvote} ${item.downvote} <Button class="upvoteInc" style="margin-left:250px"> Upvote </Button> <Button class="downvoteInc"> Downvote </Button> </li>`).join('');
           reviewList.innerHTML=allReviews;
+          voteManagement(resName);
       })
   }catch(err){
     console.log(err);
+  }
+
+}
+
+
+const voteManagement=(resName) => {
+  const upvoteBtns=document.querySelectorAll('.upvoteInc');
+
+  upvoteBtns.forEach((upvoteBtn) => {
+    upvoteBtn.addEventListener('click',function(){
+      const count =this.parentNode.getAttribute("idx");
+      updateVotes(count,resName);
+      fetchReviews(null,resName);
+  })
+   })
+
+
+}
+
+const updateVotes=(count,resName) => {
+  try {
+    fetch('updateVotes',{
+      method:'PUT',
+      body:JSON.stringify({count,resName}),
+      headers:{"Content-Type":"application/json; charset=utf-8"}
+    });
+  } catch (e) {
+      console.log(e);
   }
 
 }

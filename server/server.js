@@ -43,11 +43,29 @@ app.post('/allReviews',async (req,res) => {
   const Reviews=req.db.collection("Reviews");
 
   if(req.body.review){
-     const insertedDoc=await Reviews.insert({resName:req.body.resName,review:req.body.review});
+     const insertedDoc=await Reviews.insert({resName:req.body.resName,review:req.body.review,upvote:0,downvote:0});
   }
   const allReviewsBody=await Reviews.find({resName:req.body.resName}).toArray();
-  const allReviews=allReviewsBody.map((review) => review.review);
+  // let allReviews=allReviewsBody.map(item => {
+  //   review:item.review,
+  //   upvote:item.upvote,
+  //   downvote:item.downvote});
+  let allReviews=allReviewsBody.map((item) => ({review:item.review,upvote:item.upvote,downvote:item.downvote}));
+  allReviews=allReviews.sort((a,b) => b.upvote-a.upvote);
+
   res.send(allReviews);
+});
+
+app.put('/updateVotes',async (req,res) => {
+  const Reviews=req.db.collection("Reviews");
+
+  const allRes=await Reviews.find({resName:req.body.resName}).toArray();
+  const objectID=allRes[req.body.count]._id;
+
+  Reviews.update(
+    {_id:objectID},
+    {$inc:{"upvote":1}}
+  );
 });
 
 app.listen(port,() => {
