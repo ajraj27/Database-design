@@ -43,29 +43,44 @@ app.post('/allReviews',async (req,res) => {
   const Reviews=req.db.collection("Reviews");
 
   if(req.body.review){
-     const insertedDoc=await Reviews.insert({resName:req.body.resName,review:req.body.review,upvote:0,downvote:0});
+    const custom_id=req.body.resName.replace(/\s/g, '')+"_"+req.body.ctr;
+    const insertedDoc=await Reviews.insert({custom_id,resName:req.body.resName,review:req.body.review,upvote:0,downvote:0});
   }
   const allReviewsBody=await Reviews.find({resName:req.body.resName}).toArray();
   // let allReviews=allReviewsBody.map(item => {
   //   review:item.review,
   //   upvote:item.upvote,
   //   downvote:item.downvote});
-  let allReviews=allReviewsBody.map((item) => ({review:item.review,upvote:item.upvote,downvote:item.downvote}));
+  let allReviews=allReviewsBody.map((item) => ({review:item.review,upvote:item.upvote,downvote:item.downvote,custom_id:item.custom_id}));
   allReviews=allReviews.sort((a,b) => b.upvote-a.upvote);
 
   res.send(allReviews);
 });
 
-app.put('/updateVotes',async (req,res) => {
+app.put('/updateVotes/:id',async (req,res) => {
   const Reviews=req.db.collection("Reviews");
+  const id=req.params.id.slice(1);
 
-  const allRes=await Reviews.find({resName:req.body.resName}).toArray();
-  const objectID=allRes[req.body.count]._id;
+let resp;
 
-  Reviews.update(
-    {_id:objectID},
+if(req.body.type==='upvote'){
+  resp= await Reviews.update(
+    {custom_id:id},
     {$inc:{"upvote":1}}
   );
+}
+
+else{
+  resp = await Reviews.update(
+    {custom_id:id},
+    {$inc:{"downvote":1}}
+  );
+}
+
+
+  res.send(resp)
+//  console.log(resp);
+
 });
 
 app.listen(port,() => {

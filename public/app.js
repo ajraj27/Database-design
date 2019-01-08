@@ -64,6 +64,7 @@ searchRestaurantBtn.addEventListener("click",(e) => {
 
 const showReviews=(resName) => {
   const inputReview=document.querySelector('#review');
+
   inputReview.focus();
   const review=inputReview.value.trim(' ');
 
@@ -79,16 +80,18 @@ const showReviews=(resName) => {
 
 const fetchReviews=(review,resName) => {
   const reviewList=document.querySelector('.reviewList');
+  const ctr=reviewList.childNodes.length+1;
+
 
   try{
       fetch('/allReviews',{
         method:"POST",
-        body:JSON.stringify({resName,review}),
+        body:JSON.stringify({resName,review,ctr}),
         headers:{"Content-Type":"application/json; charset=utf-8"}
       }).then((doc) => doc.json()).then((doc) => {
-          const allReviews=doc.map((item,index) => `<li idx=${index}> ${item.review} ${item.upvote} ${item.downvote} <Button class="upvoteInc" style="margin-left:250px"> Upvote </Button> <Button class="downvoteInc"> Downvote </Button> </li>`).join('');
+          const allReviews=doc.map((item,index) => `<li id=${item.custom_id}> ${item.review}   <Button class="upvoteInc" style="margin-left:250px" onclick="voteManagement(this,'${resName}','upvote')"> Upvote </Button>${item.upvote} <Button class="downvoteInc" onclick="voteManagement(this,'${resName}','downvote')"> Downvote </Button>${item.downvote} </li>`).join('');
           reviewList.innerHTML=allReviews;
-          voteManagement(resName);
+          //voteManagement(resName);
       })
   }catch(err){
     console.log(err);
@@ -97,27 +100,22 @@ const fetchReviews=(review,resName) => {
 }
 
 
-const voteManagement=(resName) => {
-  const upvoteBtns=document.querySelectorAll('.upvoteInc');
-
-  upvoteBtns.forEach((upvoteBtn) => {
-    upvoteBtn.addEventListener('click',function(){
-      const count =this.parentNode.getAttribute("idx");
-      updateVotes(count,resName);
-      fetchReviews(null,resName);
-  })
-   })
-
-
+const voteManagement=(btn,resName,type) => {
+      const id =btn.parentNode.getAttribute("id");
+      updateVotes(id,resName,type);
 }
 
-const updateVotes=(count,resName) => {
+const updateVotes=(id,resName,type) => {
   try {
-    fetch('updateVotes',{
+    fetch(`/updateVotes/:${id}`,{
       method:'PUT',
-      body:JSON.stringify({count,resName}),
+      body:JSON.stringify({type}),
       headers:{"Content-Type":"application/json; charset=utf-8"}
-    });
+    }).then((res) =>{
+      if(res.ok){
+        fetchReviews(null,resName);
+      }
+    } )
   } catch (e) {
       console.log(e);
   }
