@@ -107,7 +107,7 @@ const voteManagement=(btn,resName,type) => {
 
 const updateVotes=(id,resName,type) => {
   try {
-    fetch(`/updateVotes/:${id}`,{
+    fetch(`/updateVotes/${id}`,{
       method:'PUT',
       body:JSON.stringify({type}),
       headers:{"Content-Type":"application/json; charset=utf-8"}

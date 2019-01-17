@@ -59,7 +59,7 @@ app.post('/allReviews',async (req,res) => {
 
 app.put('/updateVotes/:id',async (req,res) => {
   const Reviews=req.db.collection("Reviews");
-  const id=req.params.id.slice(1);
+  const id=req.params.id;
 
 let resp;
 
